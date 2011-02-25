@@ -405,6 +405,17 @@ PWM value for 'off'
 */
 // #define	BANG_BANG_OFF	45
 
+/** \def ALWAYS_POLL_ENDSTOPS
+ALWAYS_POLL_ENDSTOPS
+check endstops every time we step, instead of only during homing
+*/
+// #define	ALWAYS_POLL_ENDSTOPS
+/** \def ENDSTOP_DEBOUNCE_THRESHOLD
+ENDSTOP_DEBOUNCE_THRESHOLD
+how many consecutive times an endstop must see a flag before we believe it
+*/
+// #define	ENDSTOP_DEBOUNCE_THRESHOLD 5
+
 /**
 	move buffer size, in number of moves
 		note that each move takes a fair chunk of ram (69 bytes as of this writing) so don't make the buffer too big - a bigger serial readbuffer may help more than increasing this unless your gcodes are more than 70 characters long on average.

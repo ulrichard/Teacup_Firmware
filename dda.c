@@ -57,11 +57,7 @@ MOVE_STATE move_state __attribute__ ((__section__ (".bss")));
 #define	TO_STEP_F	16
 volatile uint8_t to_step_flags;
 
-#define	ALWAYS_POLL_ENDSTOPS
-
 #ifdef	ALWAYS_POLL_ENDSTOPS
-	#define	ENDSTOP_DEBOUNCE_THRESHOLD 5
-
 	#define	X_MIN_INDEX 0
 	#define	X_MAX_INDEX 1
 	#define	Y_MIN_INDEX 2
