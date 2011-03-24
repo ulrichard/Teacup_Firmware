@@ -454,6 +454,35 @@ void dda_step(DDA *dda) {
 		sei();
 	#endif
 
+	/*
+	update position
+	*/
+	// now we WILL step next interrupt given flags, so we will still maintain a precise positon, albeit not perfectly in sync. If the interrupt never fires again, we will be one step out
+	if (to_step_flags & TO_STEP_X) {
+		if (dda->x_direction)
+			current_position.X++;
+		else
+			current_position.X--;
+	}
+	if (to_step_flags & TO_STEP_Y) {
+		if (dda->y_direction)
+			current_position.Y++;
+		else
+			current_position.Y--;
+	}
+	if (to_step_flags & TO_STEP_Z) {
+		if (dda->z_direction)
+			current_position.Z++;
+		else
+			current_position.Z--;
+	}
+	if (to_step_flags & TO_STEP_E) {
+		if (dda->e_direction)
+			current_position.E++;
+		else
+			current_position.E--;
+	}
+
 	uint8_t endstop_stop; ///< Stop due to endstop trigger
 	uint8_t endstop_not_done = 0; ///< Which axes haven't finished homing
 	to_step_flags = 0;
@@ -679,35 +708,6 @@ void dda_step(DDA *dda) {
 		else
 			endstop_debounce_counters[Z_MAX_INDEX] = 0;
 	#endif
-
-	/*
-		update position
-	*/
-	// now we WILL step next interrupt given flags, so we will still maintain a precise positon, albeit not perfectly in sync. If the interrupt never fires again, we will be one step out
-	if (to_step_flags & TO_STEP_X) {
-		if (dda->x_direction)
-			current_position.X++;
-		else
-			current_position.X--;
-	}
-	if (to_step_flags & TO_STEP_Y) {
-		if (dda->y_direction)
-			current_position.Y++;
-		else
-			current_position.Y--;
-	}
-	if (to_step_flags & TO_STEP_Z) {
-		if (dda->z_direction)
-			current_position.Z++;
-		else
-			current_position.Z--;
-	}
-	if (to_step_flags & TO_STEP_E) {
-		if (dda->e_direction)
-			current_position.E++;
-		else
-			current_position.E--;
-	}
 
 	/*
 		now we choose how long until next step, based on chosen acceleration algorithm
