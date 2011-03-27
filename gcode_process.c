@@ -24,6 +24,7 @@
 #include	"clock.h"
 #include	"config.h"
 #include	"home.h"
+#include	"eeconfig.h"
 
 /// the current tool
 uint8_t tool;
@@ -749,15 +750,84 @@ void process_gcode_command() {
 
 			#ifdef	DEBUG
 			case 240:
+			case 340:
 				//? --- M240: echo off ---
 				//? Disable echo.
 				//? This command is only available in DEBUG builds.
+				// EEPROM Configuration as per http://reprap.org/wiki/M-codes_for_EEPROM_config
+			// M244 - set baudrate
+			case 244:
+				if (next_target.seen_S)
+					if (next_target.S >= 1200 && next_target.S <= 1000000)
+						eeconfig.baud = next_target.S;
+				break;
+			// M245 - Write temp table value, S(index), X(adc reading) Y(temperature)
+			/// TODO: check values for sanity
+			case 245:
+				if (next_target.seen_S && next_target.seen_X && next_target.seen_Y) {
+					eeconfig.temptable[next_target.S].adc_value = next_target.target.X;
+					eeconfig.temptable[next_target.S].temperature = next_target.target.Y;
+				}
+				break;
+			// M246 - choose thermistor profile
+			// M247 - set heater PWM, see M135 above
+			// M248 - PID stuff- see M130-M133 above
+			// M249 - temp residency time - wait for all temps to be within target for this long before continuing M109 and friends
+			case 249:
+				if (next_target.seen_P)
+					eeconfig.temp_residency = next_target.P;
+				break;
+			// M250 - Z min endstop position - non-zero to avoid head crashing into bed during homing
+			case 250:
+				if (next_target.seen_Z)
+					eeconfig.min_endstop_pos_z = next_target.target.Z;
+				break;
+			// M251 - set max bed temp (failsafe)
+			case 251:
+				break;
+			// M252 - set max extruder temp (failsafe)
+			// M253 - max speeds
+			case 253:
+				if (next_target.seen_X)
+					eeconfig.max_speed_x = next_target.target.X;
+				if (next_target.seen_Y)
+					eeconfig.max_speed_y = next_target.target.Y;
+				if (next_target.seen_Z)
+					eeconfig.max_speed_z = next_target.target.Z;
+				if (next_target.seen_E)
+					eeconfig.max_speed_e = next_target.target.E;
+				break;
+			// M254 - set build volume
+			case 254:
+				if (next_target.seen_X)
+					eeconfig.size_x = next_target.target.X;
+				if (next_target.seen_Y)
+					eeconfig.size_y = next_target.target.Y;
+				if (next_target.seen_Z)
+					eeconfig.size_z = next_target.target.Z;
+				break;
+			// M255 - set steps per mm
+			case 255:
+				if (next_target.seen_X)
+					eeconfig.steps_per_mm_x = next_target.target.X;
+				if (next_target.seen_Y)
+					eeconfig.steps_per_mm_y = next_target.target.Y;
+				if (next_target.seen_Z)
+					eeconfig.steps_per_mm_z = next_target.target.Z;
+				if (next_target.seen_E)
+					eeconfig.steps_per_mm_e = next_target.target.E;
+				break;
+
+
+			// DEBUG
+			#ifdef	DEBUG
 				debug_flags &= ~DEBUG_ECHO;
 				serial_writestr_P(PSTR("Echo off"));
 				// newline is sent from gcode_parse after we return
 				break;
 
 			case 241:
+			case 341:
 				//? --- M241: echo on ---
 				//? Enable echo.
 				//? This command is only available in DEBUG builds.

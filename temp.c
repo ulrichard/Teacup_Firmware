@@ -15,6 +15,7 @@
 #include	"debug.h"
 #ifndef	EXTRUDER
 	#include	"sersendf.h"
+	#include	"eeconfig.h"
 #endif
 #include	"heater.h"
 #ifdef	TEMP_INTERCOM
@@ -291,13 +292,23 @@ void temp_sensor_tick() {
 			}
 			temp_sensors_runtime[i].last_read_temp = temp;
 		}
-		if (labs((int16_t)(temp_sensors_runtime[i].last_read_temp - temp_sensors_runtime[i].target_temp)) < (TEMP_HYSTERESIS*4)) {
-			if (temp_sensors_runtime[i].temp_residency < (TEMP_RESIDENCY_TIME*100))
-				temp_sensors_runtime[i].temp_residency++;
-		}
-		else {
-			temp_sensors_runtime[i].temp_residency = 0;
-		}
+		#ifndef EXTRUDER
+			if (labs((int16_t)(temp_sensors_runtime[i].last_read_temp - temp_sensors_runtime[i].target_temp)) < (TEMP_HYSTERESIS*4)) {
+				if (temp_sensors_runtime[i].temp_residency < (TEMP_RESIDENCY_TIME*100))
+					temp_sensors_runtime[i].temp_residency++;
+			}
+			else {
+				temp_sensors_runtime[i].temp_residency = 0;
+			}
+		#else
+			if (labs((int16_t)(temp_sensors_runtime[i].last_read_temp - temp_sensors_runtime[i].target_temp)) < (TEMP_HYSTERESIS*4)) {
+				if (temp_sensors_runtime[i].temp_residency < (TEMP_RESIDENCY_TIME*100))
+					temp_sensors_runtime[i].temp_residency++;
+			}
+			else {
+				temp_sensors_runtime[i].temp_residency = 0;
+			}
+		#endif
 
 		if (temp_sensors[i].heater < NUM_HEATERS) {
 			heater_tick(temp_sensors[i].heater, temp_sensors[i].temp_type, temp_sensors_runtime[i].last_read_temp, temp_sensors_runtime[i].target_temp);
@@ -312,8 +323,13 @@ uint8_t	temp_achieved() {
 	uint8_t all_ok = 255;
 
 	for (i = 0; i < NUM_TEMP_SENSORS; i++) {
-		if (temp_sensors_runtime[i].temp_residency < (TEMP_RESIDENCY_TIME*100))
+		#ifndef EXTRUDER
+		if (temp_sensors_runtime[i].temp_residency < eeconfig.temp_residency*100)
 			all_ok = 0;
+		#else
+		if (temp_sensors_runtime[i].temp_residency < TEMP_RESIDENCY_TIME*100)
+			all_ok = 0;
+		#endif
 	}
 	return all_ok;
 }

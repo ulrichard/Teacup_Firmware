@@ -46,6 +46,7 @@
 #include	"arduino.h"
 #include	"clock.h"
 #include	"intercom.h"
+#include	"eeconfig.h"
 
 /// initialise all I/O - set pins as input or output, turn off unused subsystems, etc
 void io_init(void) {
@@ -268,6 +269,9 @@ void io_init(void) {
 
 /// Startup code, run when we come out of reset
 void init(void) {
+	// read config from eeprom
+	eeconfig_init();
+
 	// set up watchdog
 	wd_init();
 

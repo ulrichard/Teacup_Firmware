@@ -15,6 +15,7 @@
 
 #include	"config.h"
 #include	"arduino.h"
+#include	"eeconfig.h"
 
 /// size of TX and RX buffers. MUST be a \f$2^n\f$ value
 #define		BUFSIZE			64
@@ -84,13 +85,14 @@ volatile uint8_t flowflags = FLOWFLAG_SEND_XON;
 /// set up baud generator and interrupts, clear buffers
 void serial_init()
 {
-#if BAUD > 38401
-	UCSR0A = MASK(U2X0);
-	UBRR0 = (((F_CPU / 8) / BAUD) - 0.5);
-#else
-	UCSR0A = 0;
-	UBRR0 = (((F_CPU / 16) / BAUD) - 0.5);
-#endif
+	if (eeconfig.baud > 38401) {
+		UCSR0A = MASK(U2X0);
+		UBRR0 = ((F_CPU / 8) / eeconfig.baud) - 1;
+	}
+	else {
+		UCSR0A = 0;
+		UBRR0 = ((F_CPU / 16) / eeconfig.baud) - 1;
+	}
 
 	UCSR0B = MASK(RXEN0) | MASK(TXEN0);
 	UCSR0C = MASK(UCSZ01) | MASK(UCSZ00);
