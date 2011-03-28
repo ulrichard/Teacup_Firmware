@@ -13,6 +13,7 @@ eeconfig_struct eeconfig;
 eeconfig_struct EEMEM EE_config;
 
 void eeconfig_init() {
+	#ifdef EECONFIG
 	uint16_t mycrc;
 	eeprom_read_block(&eeconfig, &EE_config, sizeof(eeconfig_struct));
 	mycrc = crc_block(&eeconfig, sizeof(eeconfig_struct) - sizeof(uint16_t));
@@ -43,12 +44,15 @@ void eeconfig_init() {
 
 		eeconfig.baud = BAUD;
 	}
+	#endif /* EECONFIG */
 }
 
 void eeconfig_save() {
+	#ifdef EECONFIG
 	eeconfig.crc = crc_block(&eeconfig, sizeof(eeconfig_struct) - sizeof(uint16_t));
 	eeprom_write_block(&eeconfig, &EE_config, sizeof(eeconfig_struct));
 	do {
 		clock_poll();
 	} while (eeprom_is_ready() == 0);
+	#endif /* EECONFIG */
 }

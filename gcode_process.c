@@ -754,6 +754,7 @@ void process_gcode_command() {
 				//? --- M240: echo off ---
 				//? Disable echo.
 				//? This command is only available in DEBUG builds.
+			#ifdef	EECONFIG
 				// EEPROM Configuration as per http://reprap.org/wiki/M-codes_for_EEPROM_config
 			// M244 - set baudrate
 			case 244:
@@ -817,7 +818,7 @@ void process_gcode_command() {
 				if (next_target.seen_E)
 					eeconfig.steps_per_mm_e = next_target.target.E;
 				break;
-
+			#endif	/* EECONFIG */
 
 			// DEBUG
 			#ifdef	DEBUG

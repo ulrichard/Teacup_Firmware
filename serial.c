@@ -85,6 +85,7 @@ volatile uint8_t flowflags = FLOWFLAG_SEND_XON;
 /// set up baud generator and interrupts, clear buffers
 void serial_init()
 {
+	#ifdef	EECONFIG
 	if (eeconfig.baud > 38401) {
 		UCSR0A = MASK(U2X0);
 		UBRR0 = ((F_CPU / 8) / eeconfig.baud) - 1;
@@ -93,6 +94,16 @@ void serial_init()
 		UCSR0A = 0;
 		UBRR0 = ((F_CPU / 16) / eeconfig.baud) - 1;
 	}
+	#else
+	if (BAUD > 38401) {
+		UCSR0A = MASK(U2X0);
+		UBRR0 = ((F_CPU / 8) / BAUD) - 1;
+	}
+	else {
+		UCSR0A = 0;
+		UBRR0 = ((F_CPU / 16) / BAUD) - 1;
+	}
+	#endif
 
 	UCSR0B = MASK(RXEN0) | MASK(TXEN0);
 	UCSR0C = MASK(UCSZ01) | MASK(UCSZ00);

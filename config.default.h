@@ -394,20 +394,28 @@ DEFINE_HEATER(bed,      PB4)
 */
 // #define	DEBUG
 
+/** \def EECONFIG
+	EECONFIG
+		allows runtime reconfiguration of critical variables
+
+		See http://reprap.org/wiki/M-codes_for_EEPROM_config
+*/
+// #define	EECONFIG
+
 /** \def BANG_BANG
-BANG_BANG
-drops PID loop from heater control, reduces code size significantly (1300 bytes!)
-may allow DEBUG on '168
+	BANG_BANG
+		drops PID loop from heater control, reduces code size significantly (1300 bytes!)
+		may allow DEBUG on '168
 */
 // #define	BANG_BANG
 /** \def BANG_BANG_ON
-BANG_BANG_ON
-PWM value for 'on'
+	BANG_BANG_ON
+		PWM value for 'on'
 */
 // #define	BANG_BANG_ON	200
 /** \def BANG_BANG_OFF
-BANG_BANG_OFF
-PWM value for 'off'
+	BANG_BANG_OFF
+		PWM value for 'off'
 */
 // #define	BANG_BANG_OFF	45
 
