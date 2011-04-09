@@ -49,17 +49,16 @@ void clock_250ms() {
 			sersendf_P(PSTR("Dst: %lq,%lq,%lq,%lq,%lu\n"), movebuffer[mb_tail].endpoint.X, movebuffer[mb_tail].endpoint.Y, movebuffer[mb_tail].endpoint.Z, movebuffer[mb_tail].endpoint.E, movebuffer[mb_tail].endpoint.F);
 
 			// Queue
-			print_queue();
-
-			// newline
-			serial_writechar('\n');
+			print_queue(); serial_writechar('\n');
 		}
 		// temperature
 		/*		if (temp_get_target())
 		temp_print();*/
 	}
+
 	#ifdef	TEMP_INTERCOM
-	start_send();
+	/// \todo handle multiple extruder boards here
+	start_send(1);
 	#endif
 }
 
