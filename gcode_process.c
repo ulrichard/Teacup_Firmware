@@ -25,9 +25,6 @@
 #include	"config.h"
 #include	"home.h"
 
-/// the current tool
-uint8_t tool;
-
 /// the tool to be changed when we get an M6
 uint8_t next_tool;
 
@@ -388,7 +385,7 @@ void process_gcode_command() {
 				//? --- M6: tool change ---
 				//?
 				//? Undocumented.
-				tool = next_tool;
+				next_target.target.T = next_tool;
 				break;
 
 			case 82:
