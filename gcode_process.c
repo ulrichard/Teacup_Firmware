@@ -473,10 +473,12 @@ void process_gcode_command() {
 				//? Set the temperature of the current extruder to 190<sup>o</sup>C and return control to the host immediately (''i.e.'' before that temperature has been reached by the extruder).  See also M109.
 				//? Teacup supports an optional P parameter as a sensor index to address (eg M104 P1 S100 will set the bed temperature rather than the extruder temperature).
 				//?
-				if ( ! next_target.seen_S)
-					break;
 				if ( ! next_target.seen_P)
 					next_target.P = HEATER_EXTRUDER;
+				if ( ! next_target.seen_S)
+					break;
+				if (!next_target.seen_P)
+					next_target.P = next_target.target.T;
 				temp_set(next_target.P, next_target.S);
 				if (next_target.S)
 					power_on();
@@ -496,8 +498,8 @@ void process_gcode_command() {
 				#ifdef ENFORCE_ORDER
 					queue_wait();
 				#endif
-				if ( ! next_target.seen_P)
-					next_target.P = TEMP_SENSOR_none;
+				if (!next_target.seen_P)
+					next_target.P = next_target.target.T;
 				temp_print(next_target.P);
 				break;
 
@@ -549,7 +551,7 @@ void process_gcode_command() {
 				if ( ! next_target.seen_S)
 					break;
 				if ( ! next_target.seen_P)
-					next_target.P = HEATER_EXTRUDER;
+					next_target.P = next_target.target.T;
 				temp_set(next_target.P, next_target.S);
 				if (next_target.S) {
 					power_on();
