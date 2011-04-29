@@ -5,6 +5,9 @@
 /* are platform dependent.                                               */
 /*-----------------------------------------------------------------------*/
 
+#include "config.h"
+
+#ifdef SD
 
 #include <avr/io.h>
 #include "arduino.h"
@@ -18,8 +21,8 @@
 ---------------------------------------------------------------------------*/
 
 /* Port Controls  (Platform dependent) */
-#define CS_LOW()	WRITE(SS, 0)			/* MMC CS = L */
-#define	CS_HIGH()	WRITE(SS, 1)			/* MMC CS = H */
+#define CS_LOW()	WRITE(SD_SS, 0)			/* MMC CS = L */
+#define	CS_HIGH()	WRITE(SD_SS, 1)			/* MMC CS = H */
 // #define SOCKWP		(PINB & 0x20)		/* Write protected. yes:true, no:false, default:false */
 // #define SOCKINS		(!(PINB & 0x10))	/* Card detected.   yes:true, no:false, default:true */
 
@@ -602,3 +605,5 @@ void disk_timerproc (void)
 
 	Stat = s;				/* Update MMC status */
 }
+
+#endif /* SD */

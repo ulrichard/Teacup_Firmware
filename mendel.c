@@ -47,6 +47,37 @@
 #include	"clock.h"
 #include	"intercom.h"
 
+#ifdef SD
+	#include	"diskio.h"
+	#include	"ff.h"
+	#include	"sd.h"
+
+	// see sd.h for flag values
+	volatile uint8_t sdflags;
+
+	uint8_t sdbuffer[32];
+	FATFS fatfs;
+	FIL file;
+	FILINFO fileinfo;
+	DIR dir;
+	FRESULT fr;
+
+	DWORD get_fattime() {
+		/*	uint32_t packed;
+
+		uint8_t year = (2011 - 1980);
+		uint8_t month = 4;
+		uint8_t day = 28;
+		uint8_t hour = 21;
+		uint8_t minute = 20;
+		uint8_t second = 34;
+
+		packed = (((uint32_t) year) << 25) | ((month & 15UL) << 21) | ((day & 31UL) << 16) | ((hour & 31UL) << 11) | ((minute & 63UL) << 5) | ((second & 63UL) << 0);
+		return packed;*/
+		return ((2011UL - 1980UL) << 25) | (4UL << 21) | (28UL << 16) | (21UL << 11) | (20UL << 5) | 34UL;
+	}
+#endif /* SD */
+
 /// initialise all I/O - set pins as input or output, turn off unused subsystems, etc
 void io_init(void) {
 	// disable modules we don't use
@@ -296,6 +327,14 @@ void init(void) {
 	// set up temperature inputs
 	temp_init();
 
+	#ifdef SD
+		sdflags = 0;
+		disk_initialize(0);
+		fr = f_mount(0, &fatfs);
+		if (fr == FR_OK)
+			sdflags = SDFLAG_MOUNTED;
+	#endif
+
 	// enable interrupts
 	sei();
 
@@ -312,6 +351,7 @@ void init(void) {
 /// just run init(), then run an endless loop where we pass characters from the serial RX buffer to gcode_parse_char() and check the clocks
 int main (void)
 {
+	uint8_t c = 13;
 	init();
 
 	// main loop
@@ -319,9 +359,41 @@ int main (void)
 	{
 		// if queue is full, no point in reading chars- host will just have to wait
 		if ((serial_rxchars() != 0) && (queue_full() == 0)) {
-			uint8_t c = serial_popchar();
+			c = serial_popchar();
+
+			#ifdef SD
+			if (sdflags & SDFLAG_WRITING) {
+				UINT n;
+				fr = f_write(&file, &c, 1, &n);
+				if ((n != 1) || (fr != FR_OK)) {
+					// todo: spit an error or something
+					sdflags &= ~SDFLAG_WRITING;
+				}
+			}
+			#endif
+
+			// todo: prevent moves being executed when loading to SD, in a way that allows us to precalculate and save some data eg; a D word for distance or a C word for c0, etc
 			gcode_parse_char(c);
 		}
+
+		#ifdef SD
+		if (c == 13) {
+			if (queue_full() == 0) {
+				if (sdflags & SDFLAG_READING) {
+					UINT n;
+					do {
+						fr = f_read(&file, &c, 1, &n);
+						if ((n == 1) && (fr == FR_OK)) {
+							gcode_parse_char(c);
+						}
+						else {
+							sdflags &= ~SDFLAG_READING;
+						}
+					} while (c != 13);
+				}
+			}
+		}
+		#endif
 
 		ifclock(clock_flag_10ms) {
 			clock_10ms();

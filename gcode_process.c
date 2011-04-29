@@ -25,6 +25,10 @@
 #include	"config.h"
 #include	"home.h"
 
+#ifdef SD
+	#include	"sd.h"
+#endif
+
 /// the current tool
 uint8_t tool;
 
@@ -833,6 +837,83 @@ void process_gcode_command() {
 				break;
 			#endif /* DEBUG */
 
+			#ifdef SD
+			// M20 - List SD card
+			case 20:
+				break;
+			// M21 - Initialise SD card
+			case 21:
+				disk_initialize(0);
+				fr = f_mount(0, &fatfs);
+				if (fr == FR_OK) {
+					fr = f_opendir(&dir, "/");
+					if (fr == FR_OK) {
+						serial_writestr_P(PSTR("SD initialised"));
+						sdflags = SDFLAG_MOUNTED;
+					}
+					else {
+						sersendf_P(PSTR("E: read root directory failed: %sd!"), fr);
+					}
+				}
+				else {
+					sersendf_P(PSTR("E: SD init failed: %sd!"), fr);
+				}
+				break;
+			// M22 - Release SD card
+			case 22:
+				f_close(&file);
+				sdflags = 0;
+				break;
+			// M23 - Select file
+			case 23:
+				// filename should be stored in sdbuffer
+				fr = f_open(&file, (TCHAR *) sdbuffer, FA_READ | FA_OPEN_EXISTING);
+				if (fr == FR_OK) {
+					sersendf_P(PSTR("'%t' ready"), sdbuffer);
+				}
+				else {
+					sersendf_P(PSTR("E: could not open '%t': %sd"), sdbuffer, fr);
+				}
+				break;
+			// M24 - Start/resume print
+			case 24:
+				sdflags |= SDFLAG_READING;
+				break;
+			// M25 - pause print
+			case 25:
+				sdflags &= ~SDFLAG_READING;
+				break;
+			// M26 - seek
+			case 26:
+				fr = f_lseek(&file, next_target.S);
+				if (fr == FR_OK) {
+					sersendf_P(PSTR("Ready to print from %lu bytes"), next_target.S);
+				}
+				else {
+					sersendf_P(PSTR("E: seek failed: %sd"), fr);
+				}
+				break;
+			// M27 - report SD status
+			case 27:
+
+				break;
+			// M28 - Begin write
+			case 28:
+				fr = f_open(&file, (TCHAR *) sdbuffer, FA_WRITE | FA_CREATE_ALWAYS);
+				if (fr == FR_OK) {
+					sersendf_P(PSTR("Ready to write to '%t'"), sdbuffer);
+					sdflags |= SDFLAG_WRITING;
+				}
+				else {
+					sersendf_P(PSTR("E: open failed: %sd"), fr);
+				}
+				break;
+			// M29 - Stop writing
+			case 29:
+				sdflags &= ~SDFLAG_WRITING;
+				f_close(&file);
+				break;
+			#endif /* SD */
 				// unknown mcode: spit an error
 			default:
 				sersendf_P(PSTR("E: Bad M-code %d"), next_target.M);
