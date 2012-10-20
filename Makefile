@@ -38,7 +38,8 @@ MCU_TARGET = atmega644p
 # MCU_TARGET = atmega32u4
 
 # CPU clock rate
-F_CPU = 16000000L
+F_CPU = 20000000L
+# F_CPU = 16000000L
 # F_CPU = 8000000L
 DEFS = -DF_CPU=$(F_CPU)
 
@@ -60,8 +61,10 @@ AVRDUDECONF = /etc/avrdude.conf
 #                                                                            #
 ##############################################################################
 
-PROGPORT = /dev/arduino
+# PROGPORT = /dev/arduino
 # PROGPORT = /dev/ttyUSB0
+# PROGPORT = /dev/ttyACM0
+PROGPORT = /dev/ttyBIFF0
 
 ##############################################################################
 #                                                                            #
@@ -85,6 +88,7 @@ PROGBAUD = 115200
 ##############################################################################
 
 PROGID = stk500v2
+#PROGID = stk500
 
 ##############################################################################
 #                                                                            #

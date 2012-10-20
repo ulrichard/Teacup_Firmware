@@ -69,8 +69,8 @@
 
 	all numbers are integers, so no decimal point, please :-)
 */
-#define	STEPS_PER_M_X					40000
-#define	STEPS_PER_M_Y					40000
+#define	STEPS_PER_M_X					80000
+#define	STEPS_PER_M_Y					80000
 #define	STEPS_PER_M_Z					320000
 
 /// http://blog.arcol.hu/?p=157 may help with this one
@@ -306,7 +306,7 @@
 
 //                 name       type            pin        additional
 DEFINE_TEMP_SENSOR(extruder,  TT_THERMISTOR,  AIO1,      THERMISTOR_EXTRUDER)
-DEFINE_TEMP_SENSOR(bed,       TT_THERMISTOR,  AIO2,      THERMISTOR_BED)
+//DEFINE_TEMP_SENSOR(bed,       TT_THERMISTOR,  AIO2,      THERMISTOR_BED)
 
 
 
